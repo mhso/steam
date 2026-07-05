@@ -8,17 +8,19 @@ from steam.core.crypto import generate_session_key, symmetric_encrypt
 from steam.utils.web import make_requests_session, generate_session_id
 
 
-class Web(object):
+class Web:
     _web_session = None
 
     def __init__(self, *args, **kwargs):
-        super(Web, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.on(self.EVENT_DISCONNECTED, self.__handle_disconnect)
 
     def __handle_disconnect(self):
         self._web_session = None
 
+    # TODO: DEPRECATED. This function not work anymore.
+    #This function must be rewritten to use  WebAuth
     def get_web_session_cookies(self):
         """Get web authentication cookies via WebAPI's ``AuthenticateUser``
 

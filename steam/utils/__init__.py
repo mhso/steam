@@ -1,12 +1,6 @@
 """Utility package with various useful functions
 """
-import six
-from six.moves import xrange as _range
 import sys
-
-if six.PY2 and sys.platform == 'win32':
-    import win_inet_pton
-
 import weakref
 import struct
 import socket
@@ -63,11 +57,11 @@ def chunks(arr, size):
     :return: generator object
     :rtype: :class:`generator`
     """
-    for i in _range(0, len(arr), size):
+    for i in range(0, len(arr), size):
         yield arr[i:i+size]
 
 
-class WeakRefKeyDict(object):
+class WeakRefKeyDict:
     """Pretends to be a dictionary.
     Use any object (even unhashable) as key and store a value.
     Once the object is garbage collected, the entry is destroyed automatically.
@@ -93,7 +87,7 @@ class WeakRefKeyDict(object):
     def __len__(self):
         return len(self.refs)
 
-class WeakRefCallback(object):
+class WeakRefCallback:
     def __init__(self, refs, key):
         self.__dict__.update(locals())
     def __call__(self, wr):

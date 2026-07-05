@@ -1,23 +1,17 @@
 import sys
 from datetime import datetime, timedelta
 
-if sys.version_info < (3,):
-    intBase = long
-else:
-    intBase = int
-
-
-class GlobalID(intBase):
+class GlobalID(int):
     """
     Represents a globally unique identifier within the Steam network.
     Guaranteed to be unique across all racks and servers for a given Steam universe.
     """
     def __new__(cls, *args, **kwargs):
         if len(args) == 1:
-            return super(GlobalID, cls).__new__(cls, *args)
+            return super().__new__(cls, *args)
 
         gid = GlobalID.new(*args, **kwargs)
-        return super(GlobalID, cls).__new__(cls, gid)
+        return super().__new__(cls, gid)
 
     @staticmethod
     def new(sequence_count, start_time, process_id, box_id):
@@ -44,7 +38,7 @@ class GlobalID(intBase):
         pass
 
     def __repr__(self):
-        return "%s(sequence_count=%s, start_time=%s, process_id=%s, box_id=%s)" % (
+        return "{}(sequence_count={}, start_time={}, process_id={}, box_id={})".format(
             self.__class__.__name__,
             self.sequence_count,
             repr(str(self.start_time)),

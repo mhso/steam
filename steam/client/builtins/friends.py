@@ -1,16 +1,15 @@
 import logging
-from six import itervalues
 from eventemitter import EventEmitter
-from steam.steamid import SteamID, intBase
+from steam.steamid import SteamID
 from steam.enums import EResult, EFriendRelationship
 from steam.enums.emsg import EMsg
 from steam.core.msg import MsgProto
 from steam.client.user import SteamUser
 
 
-class Friends(object):
+class Friends:
     def __init__(self, *args, **kwargs):
-        super(Friends, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         #: :class:`.SteamFriendlist` instance
         self.friends = SteamFriendlist(self, logger_name="%s.friends" % self.__class__.__name__)
@@ -129,7 +128,7 @@ class SteamFriendlist(EventEmitter):
         return len(self._fr)
 
     def __iter__(self):
-        return itervalues(self._fr)
+        return self._fr.values()
 
     def __list__(self):
         return list(iter(self))
@@ -157,7 +156,7 @@ class SteamFriendlist(EventEmitter):
         """
         m = MsgProto(EMsg.ClientAddFriend)
 
-        if isinstance(steamid_or_accountname_or_email, (intBase, int)):
+        if isinstance(steamid_or_accountname_or_email, int):
             m.body.steamid_to_add = steamid_or_accountname_or_email
         elif isinstance(steamid_or_accountname_or_email, SteamUser):
             m.body.steamid_to_add = steamid_or_accountname_or_email.steam_id

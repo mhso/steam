@@ -1,14 +1,7 @@
-
-import six
 from types import GeneratorType as _GeneratorType
 from google.protobuf.message import Message as _ProtoMessageType
 
-
-if six.PY2:
-    _list_types = list, xrange, _GeneratorType
-else:
-    _list_types = list, range, _GeneratorType, map, filter
-
+_list_types = list, range, _GeneratorType, map, filter
 protobuf_mask = 0x80000000
 
 
@@ -88,7 +81,7 @@ def proto_fill_from_dict(message, data, clear=True):
         if desc.type == desc.TYPE_MESSAGE:
             if desc.label == desc.LABEL_REPEATED:
                 if not isinstance(val, _list_types):
-                    raise TypeError("Expected %s to be of type list, got %s" % (repr(key), type(val)))
+                    raise TypeError(f"Expected {repr(key)} to be of type list, got {type(val)}")
 
                 list_ref = getattr(message, key)
 
@@ -100,7 +93,7 @@ def proto_fill_from_dict(message, data, clear=True):
                     proto_fill_from_dict(item_message, item)
             else:
                 if not isinstance(val, dict):
-                    raise TypeError("Expected %s to be of type dict, got %s" % (repr(key), type(dict)))
+                    raise TypeError(f"Expected {repr(key)} to be of type dict, got {type(dict)}")
 
                 proto_fill_from_dict(getattr(message, key), val)
         else:

@@ -1,13 +1,8 @@
 import sys
 import time
 
-if sys.version_info >= (3,3):
-    _monotonic = time.monotonic
-else:
-    _monotonic = time.time  # not really monotonic vOv
 
-
-class ConstantRateLimit(object):
+class ConstantRateLimit:
     def __init__(self, times, seconds, exit_wait=False, sleep_func=time.sleep):
         """Context manager for enforcing constant rate on code inside the block .
 
@@ -47,14 +42,12 @@ class ConstantRateLimit(object):
             self.wait()
 
     def _update_ref(self):
-        self._ref = _monotonic() + self.rate
+        self._ref = time.monotonic() + self.rate
 
     def wait(self):
         """Blocks until the rate is met"""
-        now = _monotonic()
+        now = time.monotonic()
         if now < self._ref:
             delay = max(0, self._ref - now)
             self.sleep_func(delay)
         self._update_ref()
-
-

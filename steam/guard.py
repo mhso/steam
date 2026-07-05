@@ -14,7 +14,7 @@ Adding an authenticator
     wa.cli_login()
 
     sa = SteamAuthenticator(backend=wa)
-    sa.add()    # SMS code will be send to the account's phone number
+    sa.add()    # activation code will be sent via SMS (or email if no phone is on the account)
     sa.secrets  # dict with authenticator secrets (SAVE THEM!!)
 
     # save the secrets, for example to a file
@@ -78,7 +78,7 @@ from steam.webauth import MobileWebAuth
 from steam.utils.proto import proto_to_dict
 
 
-class SteamAuthenticator(object):
+class SteamAuthenticator:
     """Add/Remove authenticator from an account. Generate 2FA and confirmation codes."""
     _finalize_attempts = 5
     backend = None               #: instance of :class:`.MobileWebAuth` or :class:`.SteamClient`
@@ -165,7 +165,7 @@ class SteamAuthenticator(object):
             if resp is None:
                 raise SteamAuthenticatorError("Failed. Request timeout")
             if resp.header.eresult != EResult.OK:
-                raise SteamAuthenticatorError("Failed: %s (%s)" % (resp.header.error_message,
+                raise SteamAuthenticatorError("Failed: {} ({})".format(resp.header.error_message,
                                                                    repr(resp.header.eresult)))
 
             resp = proto_to_dict(resp.body)
@@ -178,13 +178,14 @@ class SteamAuthenticator(object):
 
     def add(self):
         """Add authenticator to an account.
-        The account's phone number will receive a SMS code required for :meth:`finalize`.
+
+        If the account has a verified phone number, Steam will send the activation
+        code via SMS. If no phone number is on the account, Steam sends the code
+        to the account's email address instead. Either way, pass the code to
+        :meth:`finalize` to complete setup.
 
         :raises: :class:`SteamAuthenticatorError`
         """
-        if not self.has_phone_number():
-            raise SteamAuthenticatorError("Account doesn't have a verified phone number")
-
         resp = self._send_request('AddAuthenticator', {
             'steamid': self.backend.steam_id,
             'authenticator_time': int(time()),
@@ -200,9 +201,12 @@ class SteamAuthenticator(object):
         self.steam_time_offset = int(resp['server_time']) - time()
 
     def finalize(self, activation_code):
-        """Finalize authenticator with received SMS code
+        """Finalize authenticator with the received activation code.
 
-        :param activation_code: SMS code
+        The activation code is delivered via SMS if the account has a verified
+        phone number, or via email otherwise (subject: "Add Authenticator Request").
+
+        :param activation_code: activation code from SMS or email
         :type activation_code: str
         :raises: :class:`SteamAuthenticatorError`
         """
@@ -250,7 +254,7 @@ class SteamAuthenticator(object):
         })
 
         if not resp['success']:
-            raise SteamAuthenticatorError("Failed to remove authenticator. (attempts remaining: %s)" % (
+            raise SteamAuthenticatorError("Failed to remove authenticator. (attempts remaining: {})".format(
                 resp['revocation_attempts_remaining'],
                 ))
 
@@ -568,7 +572,7 @@ def generate_device_id(steamid):
     :rtype: str
     """
     h = hexlify(sha1_hash(str(steamid).encode('ascii'))).decode('ascii')
-    return "android:%s-%s-%s-%s-%s" % (h[:8], h[8:12], h[12:16], h[16:20], h[20:32])
+    return f"android:{h[:8]}-{h[8:12]}-{h[12:16]}-{h[16:20]}-{h[20:32]}"
 
 def extract_secrets_from_android_rooted(adb_path='adb'):
     """Extract Steam Authenticator secrets from a rooted Android device
