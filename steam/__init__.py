@@ -1,4 +1,4 @@
-__version__ = "2.0.0-alpha1"
+__version__ = "1.4.5"
 __author__ = "Rossen Georgiev"
 
-version_info = (2, 0, 0)
+version_info = (1, 4, 5)
