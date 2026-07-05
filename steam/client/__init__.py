@@ -80,7 +80,7 @@ class SteamClient(CMClient, BuiltinBase):
 
         # emit job events
         if msg.proto:
-            jobid = msg.header.jobid_target
+            jobid = msg.header.job_id_target
         else:
             jobid = msg.header.targetJobID
 
